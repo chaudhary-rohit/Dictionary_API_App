@@ -1,27 +1,23 @@
 package com.example.dictionary;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.io.IOException;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements DictAsyncResponse
 {
-    EditText editText;
-    TextView textView;
     Button button;
+    EditText word;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -29,54 +25,55 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        editText = (EditText)findViewById(R.id.editText);
-        textView = (TextView)findViewById(R.id.textView);
-        button   = (Button)findViewById(R.id.button);
+        button = findViewById(R.id.bt_show);
+        word   = findViewById(R.id.word);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        button.setOnClickListener(new View.OnClickListener()
+        {
             @Override
             public void onClick(View v)
             {
-                final Dict_API_Task dict_api_task =new Dict_API_Task();
-                String word = editText.getText().toString();
-                dict_api_task.execute(word);
+                startDictAPI();
             }
         });
-
     }
-    class Dict_API_Task extends AsyncTask<String, String, String>
+
+    public void startDictAPI()
     {
-        @Override
-        protected String doInBackground(String... strings)
-        {
-
-            OkHttpClient client = new OkHttpClient();
-            String URL =  "https://mashape-community-urban-dictionary.p.rapidapi.com/define?term=" + strings[0];
-
-            Request request = new Request.Builder()
-                    .url(URL)
-                    .get()
-                    .addHeader("x-rapidapi-host", "mashape-community-urban-dictionary.p.rapidapi.com")
-                    .addHeader("x-rapidapi-key", "eeceda4f4dmshd91dd528003ad93p1437f7jsn7c9498e6aee4")
-                    .build();
-
-            try
-            {
-                Response response = client.newCall(request).execute();
-                return(response.body().string());
-            }
-            catch (IOException e)
-            {
-                //Toast.makeText(MainActivity.this, "Word not found", Toast.LENGTH_SHORT).show();
-                return("Meaning not found!!");
-            }
-
-        }
-
-        @Override
-        protected void onPostExecute(String s)
-        {
-            textView.setText(s);
-        }
+        DictAsyncTask dictAPItask = new DictAsyncTask();
+        dictAPItask.delegate = this;
+        dictAPItask.execute(word.getText().toString());
+        Log.i("DICTAPI", "Invoked DICTAPI task");
     }
+
+    @Override
+    public void dictProcessFinish(DictData result)
+    {
+        Log.i("DICTAPI", "dictProcessFinish() triggered ");
+        createBottomSheetDialogue(result);
+    }
+
+    private void createBottomSheetDialogue(DictData dictData)
+    {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog);
+        bottomSheetDialog.setCanceledOnTouchOutside(false);
+
+        TextView word = bottomSheetDialog.findViewById(R.id.word);
+        TextView phonetic = bottomSheetDialog.findViewById(R.id.phonetic);
+        ImageButton audio = bottomSheetDialog.findViewById(R.id.audio_btn);
+
+        word.setText(dictData.word);
+        phonetic.setText(dictData.phonetic);
+
+        RecyclerView recyclerView = bottomSheetDialog.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        recyclerView.setAdapter(new AdapterRecyclerView(dictData.subData, MainActivity.this));
+
+        //skipping audio_btn for now
+
+        bottomSheetDialog.show();
+    }
+
 }
