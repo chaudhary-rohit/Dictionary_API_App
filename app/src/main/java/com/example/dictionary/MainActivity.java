@@ -1,5 +1,7 @@
 package com.example.dictionary;
 
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,6 +20,8 @@ import com.example.dictionary.recycler_views.L1RecyclerView;
 import com.example.dictionary.recycler_views.L1DictData;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements DictAsyncResponse
 {
@@ -60,52 +64,78 @@ public class MainActivity extends AppCompatActivity implements DictAsyncResponse
     public void dictProcessFinish(L1DictData result)
     {
         Log.i("DICTAPI", "dictProcessFinish() triggered ");
-        Log.i("DICTAPI", "Length of subData" + result.l2DictData.size());
-        Log.i("DICTAPI", "Length of subSubData" + result.l2DictData.get(0).l3DictData.size());
-//        Log.i("DICTAPI", "Definition1 " + result.subData.get(0).subSubData.get(0).definition);
-//        Log.i("DICTAPI", "Definition1 " + result.subData.get(0).subSubData.get(1).definition);
         createBottomSheetDialogue(result);
     }
 
-    private void createBottomSheetDialogue(L1DictData l1DictData)
+    private void createBottomSheetDialogue(final L1DictData l1DictData)
     {
-        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
-        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog);
-        bottomSheetDialog.setCanceledOnTouchOutside(false);
+        if(l1DictData != null)
+        {
+            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
+            bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog);
+            bottomSheetDialog.setCanceledOnTouchOutside(false);
 
-        TextView word = bottomSheetDialog.findViewById(R.id.word);
-        TextView phonetic = bottomSheetDialog.findViewById(R.id.phonetic);
-        ImageButton audio = bottomSheetDialog.findViewById(R.id.audio_btn);
+            TextView word = bottomSheetDialog.findViewById(R.id.word);
+            TextView phonetic = bottomSheetDialog.findViewById(R.id.phonetic);
+            ImageButton audio = bottomSheetDialog.findViewById(R.id.audio_btn);
 
-        add = bottomSheetDialog.findViewById(R.id.floatingButton);
-        bookmark = bottomSheetDialog.findViewById(R.id.bmFloatingButton);
-        copy = bottomSheetDialog.findViewById(R.id.copyFloatingButton);
-        share = bottomSheetDialog.findViewById(R.id.shareFloatingButton);
-        translate = bottomSheetDialog.findViewById(R.id.translateFloatingButton);
+            add = bottomSheetDialog.findViewById(R.id.floatingButton);
+            bookmark = bottomSheetDialog.findViewById(R.id.bmFloatingButton);
+            copy = bottomSheetDialog.findViewById(R.id.copyFloatingButton);
+            share = bottomSheetDialog.findViewById(R.id.shareFloatingButton);
+            translate = bottomSheetDialog.findViewById(R.id.translateFloatingButton);
 
-        fab_open  = AnimationUtils.loadAnimation(this, R.anim.fab_open);
-        fab_close = AnimationUtils.loadAnimation(this, R.anim.fab_close);
-        rot_forward  = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
-        rot_backward = AnimationUtils.loadAnimation(this, R.anim.rotate_reverse);
+            fab_open  = AnimationUtils.loadAnimation(this, R.anim.fab_open);
+            fab_close = AnimationUtils.loadAnimation(this, R.anim.fab_close);
+            rot_forward  = AnimationUtils.loadAnimation(this, R.anim.rotate_forward);
+            rot_backward = AnimationUtils.loadAnimation(this, R.anim.rotate_reverse);
 
-        add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                animateFab();
+            String url = l1DictData.audio_link.substring(2); // your URL here
+            Log.d("AUDIO", l1DictData.audio_link.substring(2));
+            final MediaPlayer mediaPlayer = new MediaPlayer();
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            try {
+                mediaPlayer.setDataSource(url);
+                mediaPlayer.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        });
 
-        word.setText(l1DictData.word);
-        phonetic.setText(l1DictData.phonetic);
+            add.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    animateFab();
+                }
+            });
 
-        RecyclerView recyclerView = bottomSheetDialog.findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            word.setText(l1DictData.word);
+            phonetic.setText(l1DictData.phonetic);
 
-        recyclerView.setAdapter(new L1RecyclerView(l1DictData.l2DictData, MainActivity.this));
+            RecyclerView recyclerView = bottomSheetDialog.findViewById(R.id.recyclerView);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        //skipping audio_btn for now
+            recyclerView.setAdapter(new L1RecyclerView(l1DictData.l2DictData, MainActivity.this));
 
-        bottomSheetDialog.show();
+            audio.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mediaPlayer.start();
+                }
+            });
+
+            bottomSheetDialog.show();
+        }
+        else
+        {
+            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this);
+            bottomSheetDialog.setContentView(R.layout.bottom_sheet_negative);
+            bottomSheetDialog.setCanceledOnTouchOutside(false);
+
+            TextView word = bottomSheetDialog.findViewById(R.id.negative_bsd);
+            word.setText("Sorry! Word not found");
+            bottomSheetDialog.show();
+        }
+
     }
 
     private void animateFab()
