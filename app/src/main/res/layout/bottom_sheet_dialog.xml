@@ -41,13 +41,39 @@
         </LinearLayout>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/floatingActionButton"
+            android:id="@+id/floatingButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:layout_gravity="end"
-            app:srcCompat="@drawable/ic_launcher_foreground" />
+            android:src="@drawable/ic_add" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/shareFloatingButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_share"
+            android:visibility="invisible"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/translateFloatingButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_translate"
+            android:visibility="invisible"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/copyFloatingButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_copy"
+            android:visibility="invisible"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/bmFloatingButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_bookmark"
+            android:visibility="invisible"/>
+
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

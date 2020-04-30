@@ -3,6 +3,10 @@ package com.example.dictionary;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.example.dictionary.recycler_views.L1DictData;
+import com.example.dictionary.recycler_views.L2DictData;
+import com.example.dictionary.recycler_views.L3DictData;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -12,14 +16,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DictAsyncTask extends AsyncTask<String, Void, DictData>
+public class DictAsyncTask extends AsyncTask<String, Void, L1DictData>
 {
     DictAsyncResponse delegate = null;
 
     @Override
-    protected DictData doInBackground(String... strings)
+    protected L1DictData doInBackground(String... strings)
     {
-        DictData dictData = new DictData();
+        L1DictData l1DictData = new L1DictData();
         try {
             String language = "en";
             String word = strings[0];
@@ -35,13 +39,13 @@ public class DictAsyncTask extends AsyncTask<String, Void, DictData>
             {
                 String partOfSpeech = c.select(".vpx4Fd").select(".pgRvse.vdBwhd i").text();
 
-                SubData subData = new SubData();
-                subData.partOfSpeech = partOfSpeech;
+                L2DictData l2DictData = new L2DictData();
+                l2DictData.partOfSpeech = partOfSpeech;
 
                 for (Element x : c.select("div > ol").first().children().select("li"))
                 {
                     List<String> synonyms = new ArrayList<>();
-                    SubSubData subSubData = new SubSubData();
+                    L3DictData l3DictData = new L3DictData();
 
                     String parent_selector = ".QIclbb.XpoqFe";
 
@@ -53,35 +57,35 @@ public class DictAsyncTask extends AsyncTask<String, Void, DictData>
                         synonyms.add(synonym);
                     }
 
-                    subSubData.definition = definition;
-                    subSubData.example = example;
-                    subSubData.synonyms = synonyms;
+                    l3DictData.definition = definition;
+                    l3DictData.example = example;
+                    l3DictData.synonyms = synonyms;
 
                     if (definition != "" && definition != " ")
                     {
                         Log.d("SEARCH_ERR", " non-empty check passed");
-                        subData.subSubData.add(subSubData);
+                        l2DictData.l3DictData.add(l3DictData);
                     }
                 }
-                dictData.subData.add(subData);
+                l1DictData.l2DictData.add(l2DictData);
             }
-            dictData.word = word;
-            dictData.phonetic = phonetic;
-            dictData.audio_link = audio;
+            l1DictData.word = word;
+            l1DictData.phonetic = phonetic;
+            l1DictData.audio_link = audio;
         }
         catch (IOException e)
         {
             Log.d("IOExceptionLOG", "Failed at donInBackground -> First try");
             e.printStackTrace();
         }
-        return dictData;
+        return l1DictData;
     }
 
     @Override
-    protected void onPostExecute(DictData dictData)
+    protected void onPostExecute(L1DictData l1DictData)
     {
         Log.i("MEANING", "Obtained");
 
-        delegate.dictProcessFinish(dictData);
+        delegate.dictProcessFinish(l1DictData);
     }
 }

@@ -1,4 +1,4 @@
-package com.example.dictionary;
+package com.example.dictionary.recycler_views;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,14 +8,16 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.dictionary.R;
+
 import java.util.List;
 
-public class AdapterSynonymRecyclerView extends RecyclerView.Adapter<AdapterSynonymRecyclerView.ProgrammingViewHolderSRV>
+public class L3RecyclerView extends RecyclerView.Adapter<L3RecyclerView.ProgrammingViewHolderSRV>
 
 {
     private List<String> synonyms;
 
-    AdapterSynonymRecyclerView(List<String> synonyms)
+    L3RecyclerView(List<String> synonyms)
     {
         this.synonyms = synonyms;
     }

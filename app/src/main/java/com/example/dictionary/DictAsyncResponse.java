@@ -1,8 +1,8 @@
 package com.example.dictionary;
 
-import java.util.List;
+import com.example.dictionary.recycler_views.L1DictData;
 
 public interface DictAsyncResponse
 {
-    void dictProcessFinish(DictData output);
+    void dictProcessFinish(L1DictData output);
 }
